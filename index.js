@@ -5,6 +5,7 @@ const propIwLinksQuery = (title, trgtLang) =>
   `&action=query&prop=iwlinks&iwprefix=${trgtLang}&iwlimit=max&titles=${title}&format=json`;
 const propLinksQuery = (title) =>
   `&action=query&prop=links&pllimit=max&titles=${title}&format=json`;
+const propLangLinkQuery = (title, trgtLang) => ``;
 
 const getData = async (endpoint, props) => {
   try {
@@ -73,8 +74,23 @@ const testFunc = async () => {
   //   const data = await getTranslations("chair", "en", "sv");
   //   const data = await getTranslations("tycker", "sv", "pl");
   //   const data = await getTranslations("cáscara", "es", "en");
-  const data = await getTranslations(encodeURI("puszka"), "pl", "en");
-  console.log(data);
+  //   const data = await getTranslations(encodeURI("puszka"), "pl", "en");
+  const data = await getData(
+    endpoint("pl"),
+    encodeURI(
+      "&action=query&prop=langlinks&llprop=url&titles=krzesło&format=json&lllimit=max&lllang=en"
+    )
+  );
+  const wordUrl = decodeURI(
+    data.langlinks[0].url.replace(
+      "wiktionary.org/wiki",
+      "wiktionary.org/w/api.php?"
+    )
+  );
+  const regex = /\/([^\/]+)\/?$/;
+  const title = regex.exec(wordUrl)[1];
+  console.log(wordUrl);
+  console.log(title);
 };
 
 testFunc();
