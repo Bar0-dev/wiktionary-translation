@@ -20,7 +20,7 @@ To import the module
 
 Get translations with simple
 
-`const translations = await getTranslations(articleTitle, sourceLanguage, targetLamguage)`
+`const translations = await getTranslations(articleTitle, sourceLanguage, targetLanguage)`
 
 ---
 
