@@ -1,5 +1,5 @@
 {
-  "name": "wikidict-api",
+  "name": "wiktionary-translations",
   "version": "1.0.0",
   "description": "wiktionary scraper api",
   "main": "index.js",
