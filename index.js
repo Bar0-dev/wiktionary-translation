@@ -17,7 +17,7 @@ const getData = async (endpoint, props) => {
       [data] = Object.values(response.data.query.pages);
       return data;
     } else {
-      throw response.error;
+      throw new Error(response.error);
     }
   } catch (error) {
     console.log(error);
@@ -47,11 +47,16 @@ const getTranslations = async (title, srcLang, trgtLang) => {
       return response.iwlinks.map(returnCallback);
     } else {
       response = await getData(newEndpoint, propLinksQuery(title));
-      parsedTitle = response.links.find((entry) => entry.ns === 0).title;
-      response = await getData(
-        newEndpoint,
-        propIwLinksQuery(parsedTitle, trgtLang)
-      );
+      if (response.links) {
+        const parsedTitle = response.links.find(
+          (entry) => entry.ns === 0
+        ).title;
+        response = await getData(
+          newEndpoint,
+          propIwLinksQuery(parsedTitle, trgtLang)
+        );
+        if (response.iwlinks) return response.iwlinks.map(returnCallback);
+      }
     }
     if (response.iwlinks) {
       return response.iwlinks.map(returnCallback);
@@ -69,11 +74,21 @@ const fromTrgtLang = async (title, srcLang, trgtLang) => {
       endpoint(srcLang),
       propLangLinkQuery(title, trgtLang)
     );
-    console.log(response);
     //check if the page exist by exploring langlinks props
     if (response && response.langlinks) {
       response = await getData(endpoint(trgtLang), propLinksQuery(title));
-      return response;
+      const parsedWords = response.links.map((entry) => entry.title);
+      console.log(parsedWords);
+      const responses = [];
+      for (step = 0; step < parsedWords.length; step++) {
+        const localResponse = await getTranslations(
+          parsedWords[step],
+          trgtLang,
+          srcLang
+        );
+        responses.push(localResponse);
+      }
+      return responses;
     } else return false;
   } catch (error) {
     console.log(error);
@@ -87,7 +102,9 @@ const testFunc = async () => {
   // const data = await getTranslations("chair", "en", "sv");
   // const data = await getTranslations("tycker", "sv", "pl");
   // const data = await getTranslations("cáscara", "es", "en");
-  const data = await getTranslations("puszka", "pl", "en");
+  // const data = await getTranslations("puszka", "pl", "en");
+
+  const data = await fromTrgtLang("tablica", "pl", "en");
 
   console.log(data);
 };
