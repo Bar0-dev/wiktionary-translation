@@ -24,6 +24,6 @@ Get translations with simple
 
 ---
 
-## Disclaimer
+## Additional information
 
 Feel free to take this method of scraping translations and implement it into a bigger and more complex wiktionary scraper. If you like this code, please reach out to me on github. We can collaborate on creating better wiktionary module.
