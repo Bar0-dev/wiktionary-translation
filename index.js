@@ -95,18 +95,4 @@ const fromTrgtLang = async (title, srcLang, trgtLang) => {
   }
 };
 
-const testFunc = async () => {
-  //   const data = await getTranslations("wielding", "en", "pl");
-  // const data = await getTranslations("nein", "de", "pl");
-  // const data = await getTranslations("book", "en", "pl");
-  // const data = await getTranslations("chair", "en", "sv");
-  // const data = await getTranslations("tycker", "sv", "pl");
-  // const data = await getTranslations("cáscara", "es", "en");
-  // const data = await getTranslations("puszka", "pl", "en");
-
-  const data = await fromTrgtLang("tablica", "pl", "en");
-
-  console.log(data);
-};
-
-testFunc();
+module.exports = getTranslations;
