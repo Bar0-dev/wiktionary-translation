@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^0.26.1"
+    "axios": "^0.26.1",
+    "iso-639-1": "^2.1.13"
   },
   "repository": {
     "type": "git",
