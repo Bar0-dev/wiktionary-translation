@@ -2,11 +2,11 @@ const axios = require("axios").default;
 
 const endpoint = (lang) => `https://${lang}.wiktionary.org/w/api.php?`;
 const propIwLinksQuery = (title, trgtLang) =>
-  `&action=query&prop=iwlinks&iwprefix=${trgtLang}&iwlimit=max&titles=${title}&format=json`;
+  `&action=query&prop=iwlinks&iwprefix=${trgtLang}&iwlimit=max&titles=${title}&format=json&origin=*`;
 const propLinksQuery = (title) =>
-  `&action=query&prop=links&pllimit=max&titles=${title}&format=json&plprop=url`;
+  `&action=query&prop=links&pllimit=max&titles=${title}&format=json&plprop=url&origin=*`;
 const propLangLinkQuery = (title, trgtLang) =>
-  `&action=query&prop=langlinks&llprop=url&titles=${title}&format=json&lllimit=max&lllang=${trgtLang}`;
+  `&action=query&prop=langlinks&llprop=url&titles=${title}&format=json&lllimit=max&lllang=${trgtLang}&origin=*`;
 
 const getData = async (endpoint, props) => {
   try {
