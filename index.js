@@ -41,12 +41,13 @@ const getTranslations = async (title, srcLang, trgtLang) => {
       propIwLinksQuery(title, trgtLang)
     );
     //Guard clause
-    if (!respIwLinks) return false;
     //Check if iwlinks prop exists and if not update response vairable with new data from another source
+    if (!respIwLinks) return false;
     if (respIwLinks.iwlinks) {
       return respIwLinks.iwlinks.map(parseTitle);
     }
-    //Sometimes translations are on seperate page sucha as /translations
+
+    //Sometimes translations are on a separate page such as /translations
     const respIwLinksTrans = await getData(
       newEndpoint,
       propIwLinksQuery(title + "/translations", trgtLang)
