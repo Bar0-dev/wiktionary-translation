@@ -30,51 +30,59 @@ const getData = async (endpoint, props) => {
 
 const getTranslations = async (title, srcLang, trgtLang) => {
   try {
-    const regex = /\/([^\/]+)\/?$/;
     const newEndpoint = endpoint(srcLang);
-    const titlesMapping = (entry) =>
-      regex.exec(entry["*"]) ? regex.exec(entry["*"])[1] : entry["*"];
-    let response = await getData(
+    const noSlashRegex = /\/([^\/]+)\/?$/;
+    const parseTitle = (entry) =>
+      noSlashRegex.test(entry["*"])
+        ? entry["*"].match(noSlashRegex)
+        : entry["*"];
+    const respIwLinks = await getData(
       newEndpoint,
       propIwLinksQuery(title, trgtLang)
     );
-    //guard clause
-    if (!response) return false;
-    //check if iwlinks prop exists and if not update response vairable with new data from another source
-    if (response.iwlinks) {
-      return response.iwlinks.map(titlesMapping);
-    } else {
-      response = await getData(
-        newEndpoint,
-        propIwLinksQuery(title + "/translations", trgtLang)
-      );
+    //Guard clause
+    if (!respIwLinks) return false;
+    //Check if iwlinks prop exists and if not update response vairable with new data from another source
+    if (respIwLinks.iwlinks) {
+      return respIwLinks.iwlinks.map(parseTitle);
     }
-    if (response.iwlinks) {
-      return response.iwlinks.map(titlesMapping);
-    } else {
-      return fromTrgtLang(title, srcLang, trgtLang);
+    //Sometimes translations are on seperate page sucha as /translations
+    const respIwLinksTrans = await getData(
+      newEndpoint,
+      propIwLinksQuery(title + "/translations", trgtLang)
+    );
+    //Guard clause
+    if (!respIwLinksTrans) return false;
+    if (respIwLinksTrans.iwlinks) {
+      return response.iwlinks.map(parseTitle);
     }
+    //If nothing was fetched from IwLinks then get parsed translations from langLinks prop
+    const titlesLangLinks = await transLangLinks(title, srcLang, trgtLang);
+    if (titlesLangLinks && titlesLangLinks.length) {
+      return titlesLangLinks;
+    }
+    //If nothing was fetched return false
+    return false;
   } catch (error) {
     console.log(error);
   }
 };
 
-const targetCategory = (categories, srcLang, trgtLang) => {
-  if (
-    categories.find((category) =>
-      category
-        .toLowerCase()
-        .includes(ISO6391.getNativeName(trgtLang).toLowerCase())
-    ) &&
-    !categories.find((category) =>
-      category.toLowerCase().includes(":" + srcLang.toLowerCase())
-    )
-  ) {
-    return trgtLang;
-  } else return false;
-};
-
-const fromTrgtLang = async (title, srcLang, trgtLang) => {
+const transLangLinks = async (title, srcLang, trgtLang) => {
+  const parseCategories = (categories, srcLang, trgtLang) => {
+    const catString = categories.join(" ");
+    const nativeName = ISO6391.getNativeName(trgtLang);
+    const codeRegex = (langCode) => new RegExp(`:${langCode}`, "gi");
+    const nameRegex = (langName) => new RegExp(`:?${langName}`, "gi");
+    if (
+      nameRegex(nativeName).test(catString) &&
+      !codeRegex(srcLang).test(catString)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  };
   try {
     //Check if page for given title exist in target language
     const responseFromLangLinks = await getData(
@@ -115,7 +123,7 @@ const fromTrgtLang = async (title, srcLang, trgtLang) => {
           );
           if (response && response.categories) {
             const categories = response.categories.map((entry) => entry.title);
-            if (targetCategory(categories, srcLang, trgtLang)) {
+            if (parseCategories(categories, srcLang, trgtLang)) {
               return localTitle;
             } else return false;
           } else return false;
