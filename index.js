@@ -2,27 +2,35 @@ const axios = require("axios").default;
 const ISO6391 = require("iso-639-1");
 
 const endpoint = (lang) => `https://${lang}.wiktionary.org/w/api.php?`;
-const propIwLinksQuery = (title, trgtLang) =>
-  `&action=query&prop=iwlinks&iwprefix=${trgtLang}&iwlimit=max&titles=${title}&format=json&origin=*`;
-const propLinksQuery = (title) =>
-  `&action=query&prop=links&pllimit=max&titles=${title}&format=json&plprop=url&origin=*`;
-const propLangLinkQuery = (title, trgtLang) =>
-  `&action=query&prop=langlinks&llprop=url&titles=${title}&format=json&lllimit=max&lllang=${trgtLang}&origin=*`;
-const propCategoriesQuery = (title) =>
-  `&action=query&prop=categories&titles=${title}&format=json&origin=*`;
+const defaultConfig = { action: "query", format: "json", origin: "*" };
+const propIwLinksQuery = (title, trgtLang) => ({
+  ...defaultConfig,
+  prop: "iwlinks",
+  iwlimit: "max",
+  iwprefix: trgtLang,
+  titles: title,
+});
+const propLangLinksQuery = (title, trgtLang = null) => ({
+  ...defaultConfig,
+  prop: "langlinks|links",
+  lllimit: "max",
+  pllimit: "max",
+  lllang: trgtLang,
+  titles: title,
+});
+const propCategoriesQuery = (title) => ({
+  ...defaultConfig,
+  prop: "categories",
+  titles: title,
+});
 
-const getData = async (endpoint, props) => {
+const getData = async (endpoint, config) => {
   try {
-    let data = null;
-    const url = encodeURI(endpoint + props);
-    const response = await axios.get(url);
+    const response = await axios.get(endpoint, { params: config });
     if (!response || !response.data || !response.data.query) return false;
-    if (response.status === 200 && response.data.query.pages) {
-      [data] = Object.values(response.data.query.pages);
-      return data;
-    } else {
-      throw new Error(response.error);
-    }
+    if (!response.status === 200 && !response.data.query.pages) return false;
+    const [data] = Object.values(response.data.query.pages);
+    return data;
   } catch (error) {
     console.log(error);
   }
@@ -46,7 +54,6 @@ const getTranslations = async (title, srcLang, trgtLang) => {
     if (respIwLinks.iwlinks) {
       return respIwLinks.iwlinks.map(parseTitle);
     }
-
     //Sometimes translations are on a separate page such as /translations
     const respIwLinksTrans = await getData(
       newEndpoint,
@@ -85,56 +92,51 @@ const transLangLinks = async (title, srcLang, trgtLang) => {
     }
   };
   try {
-    //Check if page for given title exist in target language
-    const responseFromLangLinks = await getData(
+    //Fetch LangLinks and Links from the page
+    const respAllLinks = await getData(
       endpoint(srcLang),
-      propLangLinkQuery(title, trgtLang)
+      propLangLinksQuery(title, trgtLang)
     );
-    if (responseFromLangLinks.langlinks) {
-      //Get all links from source language page
-      const respSrcPageLinks = await getData(
-        endpoint(srcLang),
-        propLinksQuery(title)
-      );
-      //Map titles and remove original title from array of titles
-      if (!respSrcPageLinks || !respSrcPageLinks.links) return false;
-      const titlesSrcLangLinks = respSrcPageLinks.links
-        .map((entry) => entry.title)
-        .filter((localTitle) => !localTitle.includes(title));
-      //Get all links from target language page
-      const respTrgtPageLinks = await getData(
-        endpoint(trgtLang),
-        propLinksQuery(title)
-      );
-      //Map titles and remove original title from array of target page titles
-      if (!respTrgtPageLinks || !respTrgtPageLinks.links) return false;
-      const titlesTrgtPageLinks = respTrgtPageLinks.links
-        .map((entry) => entry.title)
-        .filter((localTitle) => !localTitle.includes(title));
-      //Check for the intersection between both arrays to get a translation word we are looking for
-      const intersections = titlesSrcLangLinks.filter((localTitle) =>
-        titlesTrgtPageLinks.includes(localTitle)
-      );
-      //Check for categories for the rest of the words
-      const translations = await Promise.all(
-        intersections.map(async (localTitle) => {
-          const response = await getData(
-            endpoint(trgtLang),
-            propCategoriesQuery(localTitle)
-          );
-          if (response && response.categories) {
-            const categories = response.categories.map((entry) => entry.title);
-            if (parseCategories(categories, srcLang, trgtLang)) {
-              return localTitle;
-            } else return false;
+    //Guard caluses
+    if (!respAllLinks) return false;
+    if (!respAllLinks.langlinks || !respAllLinks.links) return false;
+    //Map titles to array and filter out original title
+    const titlesSrcLinks = respAllLinks.links
+      .map((entry) => entry.title)
+      .filter((localTitle) => !localTitle.includes(title));
+    //Get all links from target language page
+    const respTrgtPageLinks = await getData(
+      endpoint(trgtLang),
+      propLangLinksQuery(title)
+    );
+    //Map titles and remove original title from array of target page titles
+    if (!respTrgtPageLinks || !respTrgtPageLinks.links) return false;
+    const titlesTrgtPageLinks = respTrgtPageLinks.links
+      .map((entry) => entry.title)
+      .filter((localTitle) => !localTitle.includes(title));
+    //Check for the intersection between both arrays to get a translation word we are looking for
+    const intersections = titlesSrcLinks.filter((localTitle) =>
+      titlesTrgtPageLinks.includes(localTitle)
+    );
+    //Check for categories for the rest of the words
+    const translations = await Promise.all(
+      intersections.map(async (localTitle) => {
+        const response = await getData(
+          endpoint(trgtLang),
+          propCategoriesQuery(localTitle)
+        );
+        if (response && response.categories) {
+          const categories = response.categories.map((entry) => entry.title);
+          if (parseCategories(categories, srcLang, trgtLang)) {
+            return localTitle;
           } else return false;
-        })
-      );
-      const filteredTranslations = translations.filter(
-        (localTitle) => localTitle
-      );
-      return filteredTranslations;
-    } else return false;
+        } else return false;
+      })
+    );
+    const filteredTranslations = translations.filter(
+      (localTitle) => localTitle
+    );
+    return filteredTranslations;
   } catch (error) {
     console.log(error);
   }
