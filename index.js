@@ -24,9 +24,9 @@ const propCategoriesQuery = (title) => ({
   titles: title,
 });
 
-const getData = async (endpoint, config) => {
+const getData = async (endpoint, params) => {
   try {
-    const response = await axios.get(endpoint, { params: config });
+    const response = await axios.get(endpoint, { params });
     if (!response || !response.data || !response.data.query) return false;
     if (!response.status === 200 && !response.data.query.pages) return false;
     const [data] = Object.values(response.data.query.pages);
@@ -38,6 +38,13 @@ const getData = async (endpoint, config) => {
 
 const getTranslations = async (title, srcLang, trgtLang) => {
   try {
+    //Langs not supported by Wiktionary
+    const notInWikt = ["ae", "lu", "nd", "nr", "oj"];
+    //Language codes validation
+    if (!ISO6391.validate(srcLang) || notInWikt.includes(srcLang))
+      throw new Error(`Invalid source language code: "${srcLang}"`);
+    if (!ISO6391.validate(trgtLang) || notInWikt.includes(trgtLang))
+      throw new Error(`Invalid target language code: "${trgtLang}"`);
     const newEndpoint = endpoint(srcLang);
     const noSlashRegex = /\/([^\/]+)\/?$/;
     const parseTitle = (entry) =>
