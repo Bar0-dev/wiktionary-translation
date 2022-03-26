@@ -67,9 +67,7 @@ const targetCategory = (categories, srcLang, trgtLang) => {
         .includes(ISO6391.getNativeName(trgtLang).toLowerCase())
     ) &&
     !categories.find((category) =>
-      category
-        .toLowerCase()
-        .includes(ISO6391.getNativeName(srcLang).toLowerCase())
+      category.toLowerCase().includes(":" + srcLang.toLowerCase())
     )
   ) {
     return trgtLang;
