@@ -1,5 +1,5 @@
-const axios = require("axios").default;
-const ISO6391 = require("iso-639-1");
+import axios from "axios";
+import ISO6391 from "iso-639-1";
 
 const endpoint = (lang) => `https://${lang}.wiktionary.org/w/api.php?`;
 const defaultConfig = { action: "query", format: "json", origin: "*" };
@@ -69,7 +69,7 @@ const getTranslations = async (title, srcLang, trgtLang) => {
     //Guard clause
     if (!respIwLinksTrans) return false;
     if (respIwLinksTrans.iwlinks) {
-      return response.iwlinks.map(parseTitle);
+      return respIwLinksTrans.iwlinks.map(parseTitle);
     }
     //If nothing was fetched from IwLinks then get parsed translations from langLinks prop
     const titlesLangLinks = await transLangLinks(title, srcLang, trgtLang);
@@ -149,4 +149,4 @@ const transLangLinks = async (title, srcLang, trgtLang) => {
   }
 };
 
-module.exports = getTranslations;
+export { getTranslations };

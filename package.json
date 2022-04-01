@@ -2,13 +2,14 @@
   "name": "wiktionary-translations",
   "version": "0.0.6",
   "description": "wiktionary scraper api",
-  "main": "index.js",
+  "main": "./dist/wiktionary-translations.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "webpack"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "axios": "^0.26.1",
     "iso-639-1": "^2.1.13"
@@ -16,5 +17,9 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Bar0-dev/wiktionary-translations.git"
+  },
+  "devDependencies": {
+    "webpack": "^5.70.0",
+    "webpack-cli": "^4.9.2"
   }
 }

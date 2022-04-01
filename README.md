@@ -4,7 +4,7 @@ JavaScript scraper for wiktionary translations.
 
 ## Disclaimer
 
-This module is still in development, it is not advisable to use it in a project yet.
+This module is still in development, it is not advisable to use it in a project yet. The behaviour of functions can be different depending on the version. It is planned to change the paradigm for this project from functional to object-oriented. Invoking functions can change drastically.
 
 ## General information
 
@@ -35,15 +35,25 @@ For installation use the following command
 
 ### Importing
 
-To import the module
+- for Node.js
 
-`const getTranslations = require("wiktionary-translations")`
+  `const wt = require("wiktionary-translations");`
 
-### Get translations
+- for ES module
 
-Get translations with simple
+  `import { getTranslations } from "wiktionary-translations";`
 
-`const translations = await getTranslations(articleTitle, sourceLanguage, targetLanguage)`
+### Functions
+
+#### getTranslations
+
+- for Node.js
+
+  `const translations = await getTranslations(articleTitle, sourceLanguage, targetLanguage)`
+
+- for ES module
+
+  `const translations = await wt.getTranslations(articleTitle, sourceLanguage, targetLanguage)`
 
 - params {string}
-- returns {array}
+- return {array}
