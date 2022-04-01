@@ -2,6 +2,10 @@
 
 JavaScript scraper for wiktionary translations.
 
+## Disclaimer
+
+This module is still in development, it is not advisable to use it in a project yet.
+
 ## General information
 
 ### How this works
