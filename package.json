@@ -1,6 +1,6 @@
 {
   "name": "wiktionary-translations",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "wiktionary scraper api",
   "main": "./dist/wiktionary-translations.js",
   "scripts": {
