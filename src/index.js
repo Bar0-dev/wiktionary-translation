@@ -1,40 +1,28 @@
-import axios from "axios";
-import ISO6391 from "iso-639-1";
+//ES6 imports
+// import ISO6391 from "iso-639-1";
+//Node.js imports
+const ISO6391 = require("iso-639-1");
+const WiktionaryRequest = require("./wiktionaryRequest");
 
-const endpoint = (lang) => `https://${lang}.wiktionary.org/w/api.php?`;
-const defaultConfig = { action: "query", format: "json", origin: "*" };
-const propIwLinksQuery = (title, trgtLang) => ({
-  ...defaultConfig,
-  prop: "iwlinks",
-  iwlimit: "max",
-  iwprefix: trgtLang,
-  titles: title,
-});
-const propLangLinksQuery = (title, trgtLang = null) => ({
-  ...defaultConfig,
-  prop: "langlinks|links",
-  lllimit: "max",
-  pllimit: "max",
-  lllang: trgtLang,
-  titles: title,
-});
-const propCategoriesQuery = (title) => ({
-  ...defaultConfig,
-  prop: "categories",
-  titles: title,
-});
-
-const getData = async (endpoint, params) => {
-  try {
-    const response = await axios.get(endpoint, { params });
-    if (!response || !response.data || !response.data.query) return false;
-    if (!response.status === 200 && !response.data.query.pages) return false;
-    const [data] = Object.values(response.data.query.pages);
-    return data;
-  } catch (error) {
-    console.log(error);
+class WiktData extends WiktionaryRequest {
+  #srcLang;
+  #trgtLang;
+  #langsNotInWikt;
+  constructor(srcLang, trgtLang) {
+    super(srcLang, trgtLang);
+    this.#langsNotInWikt = ["ae", "lu", "nd", "nr", "oj"];
   }
-};
+  validateCode(langCode) {
+    if (
+      !ISO6391.validate(langCode) ||
+      this.#langsNotInWikt.includes(langCode)
+    ) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+}
 
 const getTranslations = async (title, srcLang, trgtLang) => {
   try {
@@ -84,7 +72,7 @@ const getTranslations = async (title, srcLang, trgtLang) => {
 };
 
 const transLangLinks = async (title, srcLang, trgtLang) => {
-  const parseCategories = (categories, srcLang, trgtLang) => {
+  const checkCategories = (categories, srcLang, trgtLang) => {
     const catString = categories.join(" ");
     const nativeName = ISO6391.getNativeName(trgtLang);
     const codeRegex = (langCode) => new RegExp(`:${langCode}`, "gi");
@@ -134,7 +122,7 @@ const transLangLinks = async (title, srcLang, trgtLang) => {
         );
         if (response && response.categories) {
           const categories = response.categories.map((entry) => entry.title);
-          if (parseCategories(categories, srcLang, trgtLang)) {
+          if (checkCategories(categories, srcLang, trgtLang)) {
             return localTitle;
           } else return false;
         } else return false;
