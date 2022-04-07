@@ -4,13 +4,17 @@ JavaScript scraper for wiktionary translations.
 
 ## Disclaimer
 
-This module is still in development, it is not advisable to use it in a project yet. The behaviour of functions can be different depending on the version. It is planned to change the paradigm for this project from functional to object-oriented. Invoking functions can change drastically.
+This module is still in development, it is not advisable to use it in a project yet. The behaviour of functions can be different depending on the version.
+
+### Recently changed
+
+The module has been rewritten in an object paradigm to support better scalability. Be aware of updated usage syntax. The request count has been cut down to only up to 4 requests per word lookup.
 
 ## General information
 
 ### How this works
 
-Scraping translations from wiktionary is a really challenging task. Pages are written in the so-called WikiText markup language which is then translated to HTML. Information on the Wiktionary.org pages is easy to read for people but hard to understand for computers. Luckily parser provided through MediaWiki API is recognizing language links and sometimes even translations. It all depends on how well the page is built along with Wiktionary.org standards. Using links and language links along with word categories, it is possible to take out most of the translations.
+Scraping translations from wiktionary is a really challenging task. Pages are written in the so-called WikiText markup language which is then translated to HTML. Information on the Wiktionary.org pages is easy to read for people but hard to understand for computers. Luckily parser provided through MediaWiki API is recognizing language links and sometimes even translations. It all depends on how well the page is built along with Wiktionary.org standards. Using links and language links along with word categories, it is possible to take out most of the translations. The parameters to the functions are named as they are used with WikiMedia API, thus no 'word' or 'text' but 'title'. That's the same title that is pointing to the article if you search on the [wiktionary.org](https://www.wiktionary.org/).
 
 ### Supported languages
 
@@ -18,11 +22,7 @@ As far this module works pretty well with more popular languages it can struggle
 
 ### Use etiquette
 
-This module is pretty heavy on the number of HTTP requests per word lookup on the MediaWiki API. Sometimes, it can be up to tens of requests. I am constantly working on cutting down the number of requests per lookup. I would not recommend using this for bigger projects because It can significantly impact the MediaWiki server's performance. Please check out [API:Etiquette](https://www.mediawiki.org/wiki/API:Etiquette) to learn more about the fair use of MediaWiki API.
-
-### Recently changed
-
-The module has been rewritten in an object paradigm to support better scalability. Be aware of updated usage sytnax.
+This module is pretty heavy on the number of HTTP requests per word lookup on the MediaWiki API. I would not recommend using this for bigger projects because It can significantly impact the MediaWiki server's performance. Please check out [API:Etiquette](https://www.mediawiki.org/wiki/API:Etiquette) to learn more about how the MediaWiki API should be handled.
 
 ### Plans for future updates
 
