@@ -1,17 +1,21 @@
 //ES6 imports
-// import axios from "axios";
+import axios from "axios";
 
 //Node.js imports
-const axios = require("axios").default;
+// const axios = require("axios").default;
 
 class WiktionaryRequest {
-  #srcLang;
-  #trgtLang;
+  srcLang;
+  trgtLang;
   #defaultConfig;
   constructor(srcLang, trgtLang) {
-    this.#srcLang = srcLang;
-    this.#trgtLang = trgtLang;
+    this.srcLang = srcLang;
+    this.trgtLang = trgtLang;
     this.#defaultConfig = { action: "query", format: "json", origin: "*" };
+  }
+
+  #titleCapitalize(title) {
+    return title.replace(title[0], title[0].toUpperCase());
   }
 
   #endpoint(langCode) {
@@ -23,7 +27,7 @@ class WiktionaryRequest {
       prop: "iwlinks",
       iwlimit: "max",
       iwprefix: langCode,
-      titles: `${title}|${title}/translations`,
+      titles: `${title}|${title}/translations|${this.#titleCapitalize(title)}`,
     };
   }
 
@@ -49,8 +53,8 @@ class WiktionaryRequest {
   //Request #1
   async iwLinksDataSrc(title) {
     try {
-      const response = await axios.get(this.#endpoint(this.#srcLang), {
-        params: this.#iwLinksQuery(this.#trgtLang, title),
+      const response = await axios.get(this.#endpoint(this.srcLang), {
+        params: this.#iwLinksQuery(this.trgtLang, title),
       });
       if (!response || !response.data || !response.data.query)
         throw new Error("Invalid request");
@@ -66,8 +70,8 @@ class WiktionaryRequest {
   //Request #2
   async linksDataSrc(title) {
     try {
-      const response = await axios.get(this.#endpoint(this.#srcLang), {
-        params: this.#linksQuery(this.#trgtLang, title),
+      const response = await axios.get(this.#endpoint(this.srcLang), {
+        params: this.#linksQuery(this.trgtLang, title),
       });
       if (!response || !response.data || !response.data.query)
         throw new Error("Invalid request");
@@ -84,8 +88,8 @@ class WiktionaryRequest {
 
   async linksDataTrgt(title) {
     try {
-      const response = await axios.get(this.#endpoint(this.#trgtLang), {
-        params: this.#iwLinksQuery(null, title),
+      const response = await axios.get(this.#endpoint(this.trgtLang), {
+        params: this.#linksQuery("no langlinks", title),
       });
       if (!response || !response.data || !response.data.query)
         throw new Error("Invalid request");
@@ -101,7 +105,7 @@ class WiktionaryRequest {
   //Request #4
   async categoriesDataTrgt(titles) {
     try {
-      const response = await axios.get(this.#endpoint(this.#trgtLang), {
+      const response = await axios.get(this.#endpoint(this.trgtLang), {
         params: this.#categoriesQuery(titles.join("|")),
       });
       if (!response || !response.data || !response.data.query)
@@ -119,23 +123,7 @@ class WiktionaryRequest {
 }
 
 //Node.js
-module.exports.WiktionaryRequest = WiktionaryRequest;
+// module.exports.WiktionaryRequest = WiktionaryRequest;
 
 //ES6
-// export default WiktionaryRequest;
-
-const EnSvRequest = new WiktionaryRequest("en", "sv");
-
-const testFunct = async () => {
-  const response = await EnSvRequest.getSrcPageData("car");
-  console.log(response);
-  console.log(response[0].iwlinks);
-  // const responseCategories = await EnSvRequest.getTrgtPageData([
-  //   "Stuhl",
-  //   "Stol",
-  //   "krzesło",
-  // ]);
-  // console.log(responseCategories);
-};
-
-testFunct();
+export default WiktionaryRequest;
