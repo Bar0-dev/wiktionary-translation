@@ -6,14 +6,12 @@ import WiktionaryRequest from "./wiktionaryRequest.js";
 // const ISO6391 = require("iso-639-1");
 // const { WiktionaryRequest } = require("./wiktionaryRequest.js");
 
-class WiktData extends WiktionaryRequest {
+class WiktTransl extends WiktionaryRequest {
   #langsNotInWikt;
   constructor(srcLang, trgtLang) {
     super(srcLang, trgtLang);
     this.#langsNotInWikt = ["ae", "lu", "nd", "nr", "oj"];
     this.validateCodes([srcLang, trgtLang]);
-    //testing !!TO BE REMOVED!!
-    console.log("running v0.0.9P");
   }
   validateCodes(langCodes) {
     const [srcLangCode, trgtLangCode] = langCodes;
@@ -129,10 +127,4 @@ class WiktData extends WiktionaryRequest {
   }
 }
 
-const testFunc = async () => {
-  const wikiRequest = new WiktData("en", "pl");
-  const data = await wikiRequest.getTranslations("bubble");
-  console.log(data);
-};
-
-export default WiktData;
+export default WiktTransl;
