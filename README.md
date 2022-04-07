@@ -20,6 +20,10 @@ As far this module works pretty well with more popular languages it can struggle
 
 This module is pretty heavy on the number of HTTP requests per word lookup on the MediaWiki API. Sometimes, it can be up to tens of requests. I am constantly working on cutting down the number of requests per lookup. I would not recommend using this for bigger projects because It can significantly impact the MediaWiki server's performance. Please check out [API:Etiquette](https://www.mediawiki.org/wiki/API:Etiquette) to learn more about the fair use of MediaWiki API.
 
+### Recently changed
+
+The module has been rewritten in an object paradigm to support better scalability. Be aware of updated usage sytnax.
+
 ### Plans for future updates
 
 - parsing image URLs;
@@ -31,29 +35,24 @@ This module is pretty heavy on the number of HTTP requests per word lookup on th
 
 For installation use the following command
 
-`npm i wiktionary-translations`
+    npm i wiktionary-translations
 
 ### Importing
 
 - for Node.js
 
-  `const wt = require("wiktionary-translations");`
+      const WiktTransl = require("wiktionary-translations").default;
 
 - for ES module
 
-  `import { getTranslations } from "wiktionary-translations";`
+      import WiktTransl from "wiktionary-translations";
 
 ### Functions
 
 #### getTranslations
 
-- for Node.js
-
-  `const translations = await getTranslations(articleTitle, sourceLanguage, targetLanguage)`
-
-- for ES module
-
-  `const translations = await wt.getTranslations(articleTitle, sourceLanguage, targetLanguage)`
+    const dict = new WiktTransl("srcLangCode", "trgtLangCode");
+    const translations = await dict.getTranslations("title");
 
 - params {string}
 - return {array}
