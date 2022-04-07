@@ -134,3 +134,5 @@ const testFunc = async () => {
   const data = await wikiRequest.getTranslations("bubble");
   console.log(data);
 };
+
+export default WiktData;
