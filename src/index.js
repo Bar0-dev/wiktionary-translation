@@ -91,8 +91,8 @@ class WiktTransl extends WiktionaryRequest {
     if (parsedTitles.length) return parsedTitles;
     return false;
   }
-  async getTranslations(originalTile) {
-    const title = originalTile.toLowerCase();
+  async getTranslations(srcTitle) {
+    const title = srcTitle.toLowerCase();
     //Request #1 - get translations from internal wiki links
     const iwLinksResp = await this.iwLinksSrc(title);
     if (iwLinksResp) return this.#parseTitles(iwLinksResp);
@@ -101,6 +101,11 @@ class WiktTransl extends WiktionaryRequest {
     if (categoriesParseResp) return this.#parseTitles(categoriesParseResp);
     // this return false is giving a information that no translations were parsed
     return false;
+  }
+  async getImageUrls(srcTitle) {
+    const title = srcTitle.toLowerCase();
+    const response = await this.imageUrls(title);
+    return response;
   }
 
   #checkCategories(categories) {

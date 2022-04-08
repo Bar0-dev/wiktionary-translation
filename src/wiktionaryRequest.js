@@ -50,6 +50,15 @@ class WiktionaryRequest {
     };
   }
 
+  #imagesQuery(title) {
+    return {
+      ...this.#defaultConfig,
+      prop: "pageimages",
+      piprop: "original",
+      titles: title,
+    };
+  }
+
   //Request #1
   async iwLinksDataSrc(title) {
     try {
@@ -114,6 +123,24 @@ class WiktionaryRequest {
         throw new Error("Request to the server unsuccessful");
       const data = Object.values(response.data.query.pages).filter(
         (entry) => entry.pageid
+      );
+      return data;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  //imageResuest
+  async imageUrls(title) {
+    try {
+      const response = await axios.get(this.#endpoint(this.srcLang), {
+        params: this.#imagesQuery(title),
+      });
+      if (!response) throw new Error("Invalid request");
+      if (!response.data || !response.data.query)
+        throw new Error("Request img urls unsuccessful");
+      const data = Object.values(response.data.query.pages).map(
+        (entry) => entry.original.source
       );
       return data;
     } catch (error) {
